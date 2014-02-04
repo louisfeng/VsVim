@@ -1,4 +1,4 @@
-# git-ls-files --others --exclude-from=.git/info/exclude
+﻿# git-ls-files --others --exclude-from=.git/info/exclude
 # Lines that start with '#' are comments.
 # For a project mostly in C, the following would be a good set of
 # exclude patterns (uncomment them if you want to use them):
@@ -14,45 +14,63 @@
 *.snk 
 *.pdb 
 *.msi 
+*.vspx
+*.mdf
+*.ldf
 
 # Project Files
 *.user
 *.suo
 *.db 
+*.psess
 TestResult.xml
 
-# NUnit files
-VsVim.VisualState.xml
-VsVim.sln.VisualState.xml
+# Extra files to be ignored
+*.VisualState.xml
+*.DotSettings
 
 # Resharper
 _ReSharper.*
-
-# Directories 
-*/obj/
-*/bin/
-TestResults/
-*/Debug/
-*/Release/
 _ReSharper.VsVim
 
-# VS Binaries
-Microsoft.VisualStudio.CoreUtility.dll
-Microsoft.VisualStudio.Editor.dll
-Microsoft.VisualStudio.Editor.Implementation.dll
-Microsoft.VisualStudio.Language.Intellisense.dll
-Microsoft.VisualStudio.Language.StandardClassification.dll
-Microsoft.VisualStudio.Platform.VSEditor.dll
-Microsoft.VisualStudio.Platform.VSEditor.Interop.dll
-Microsoft.VisualStudio.Shell.ViewManager.dll
-Microsoft.VisualStudio.Text.Data.dll
-Microsoft.VisualStudio.Text.Logic.dll
-Microsoft.VisualStudio.Text.UI.dll
-Microsoft.VisualStudio.Text.Internal.dll
-Microsoft.VisualStudio.Text.UI.dll
-Microsoft.VisualStudio.Text.UI.Wpf.dll
-Microsoft.VisualStudio.UI.Undo.dll
-FSharp.Core.dll
+# Productivity Power Tools
+*.docstates
+
+# Roslyn
+VimAll.sln.ide/
+VimCore.sln.ide/
+VsVim.sln.ide/
+
+# Place where dogfood drops get put into. 
+Dogfood/
+
+# This solution uses NuGet package restore so don't check in
+# the actual binaries
+packages/
+
+# Ignore the Delpoy directory. This is where the deploy script
+# checks in a vsix that is deployable
+Deploy/
+
+# Ignore NCrunch files for the moment.  Still experimenting and
+# don't want to put them in there just yet
+*ncrunchproject
+*ncrunchsolution
+*crunchsolution.cache
+
+# Directories 
+Debug/
+Release/
+bin/
+obj/
+TestsResults/
+
+# Copied into a source directory for ease of build
+VsVim.Vs2012.dll
+VsVim.Vs2012.pdb
+VsVim.Vs2013.dll
+VsVim.Vs2013.pdb
 
 # Profiling Output
 *.vsp
+

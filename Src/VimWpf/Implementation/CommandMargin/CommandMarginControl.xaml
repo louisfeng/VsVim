@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="Vim.UI.Wpf.Implementation.CommandMargin.CommandMarginControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="25" d:DesignWidth="419"
+             x:Name="commandMarginControl"
+             >
+
+    <Grid
+        DataContext="{Binding ElementName=commandMarginControl}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBox
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="recording"
+            IsReadOnly="True"
+            FontWeight="Bold"
+            Visibility="{Binding Path=IsRecording}"
+            Foreground="{Binding Path=TextForeground}"
+            Background="{Binding Path=TextBackground}"
+            />
+
+        <TextBox 
+            x:Name="_commandLineInput"
+            Grid.Row="0"
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Text="{Binding Path=StatusLine}" 
+            IsReadOnly="{Binding Path=IsEditReadOnly}"
+            FontFamily="{Binding Path=TextFontFamily}"
+            FontSize="{Binding Path=TextFontSize}"
+            Foreground="{Binding Path=TextForeground}"
+            Background="{Binding Path=TextBackground}"
+            />
+
+        <Button
+            x:Name="_optionsButton"
+            Grid.Row="0"
+            Grid.Column="2"
+            Content="Options"
+            />
+    </Grid>
+</UserControl>

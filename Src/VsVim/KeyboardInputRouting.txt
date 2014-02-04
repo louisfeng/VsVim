@@ -1,0 +1,104 @@
+﻿
+This is intended to document the way in which keyboard input navigates throughout Visual 
+Studio.  This process is complex due to in a large part it's history and attempts at 
+ensuring backwards compatibility.  There are several layers from Win32 to WPF that all 
+combine together to route input. 
+
+This document is built purely from my experiences writing VsVim and debugging through many
+user reported issues.  
+
+
+Let’s start off with a high level view of the events and systems and the order in which they
+fire
+  1. PreTranslateMessage – Native windows messages.  May handle and swallow a message
+  2. WPF and TextCompositionManager
+     a. KeyDown
+     b. TranslateAccelator
+     b. TextInput
+ 
+Now how the components in Visual Studio play together to route key input
+ 
+  1. PreTranslateMessage – This is handled in msenv.  It has the first go and will attempt 
+     to map keyboard input into a key boarding binding for a Visual Studio command.  It 
+     will only attempt to map non-alphanumeric input or alphanumeric input which has a 
+     modifier such as Shift, Control, Alt.  If it can find a match then it uses the key 
+     stroke otherwise it gets passed on goes to #2
+  2. WPF
+    a. VisualElement raises the KeyDown.  KeyProcessor’s now come into play as they 
+       indirectly subscribe to this event which they can interpret and handle. 
+    b. Translate Acessorator goes through the IVsChain.  This causes problems because certain
+       components (IVsFilterKeysAdapter) will intercept and swallow the keystroke.  
+    c. TextCompositionManager receives the message and after much magic raises the 
+       TextInput event on KeyProcessors. 
+      i. Note: How the key is entered changes which field on TextComposition has the text.  
+         For normal printable input the text will be on the Text property.  For items like 
+         CTRL-M it will be on the ControlText property. 
+      ii. One of the key processors is VsKeyProcessor which will turn every character in the 
+        Text property of the argument into a TYPECHAR command. 
+ 
+ Another way to look at it from a component perspective from when a message is recieved 
+
+  - msenv::ProcessMessage
+    - msenv::SCM_MsoStdCompMgr::FPreTranslateMessage
+      - msenv::CMsoComponent::FPreTranslateMessage
+        - msenv::CMsoComponent::MainFTranslateMessage
+          - IVsWindowManager::TranslateAccelerator
+            - IVsCodeWindow::PreTranslateMessage
+              - IVsFilterKeysAdapter::TranslateAccelerator
+          - Visual Studio Commands.
+    - IVsWindowManager::PreTranslateInput
+      - System.Windows.Interop.ComponentDispatcher.RaiseThreadMessage
+         - TextCompositionManager 
+            - KeyProcessor.KeyDown
+            - KeyProcessor.TextInput
+      - If that returns true then done
+  - TranslateMessage
+  - DispatchMessage
+    
+Focus Issues
+====
+Visual Studio handles focus in an undocumented way and this is a small description of the behaviors
+
+Peek Definition Window
+---
+    Here the parent refers to the original ITextView and the child refers to the ITextView embedded
+    in the peek window that is opened 
+
+    ITextView::HasAggregateFocus
+    ---
+        The HasAggregateFocus states the property is true with when the focus is in the ITextView or 
+        any of its adornments.  This is not entirely correct though because the peek definition window
+        is actually implemented as an adornment.  There is a layer between the adornment and the 
+        ITextView that breaks this relationship for at least HasAggregateFocus.  
+
+        - Parent
+            - true when the focus is in the original window
+            - false when the focus is in the peek window
+        - Child
+            - false when the focus is in the original window
+            - true when the focus is in the peek window 
+
+    IWpfTextView::Visual::IsKeyboardFocusWithin
+    ---
+        - Parent
+            - true in both cases
+        - Child
+            - true if the caret is inside the peek window
+            - false if the caret is inside the original window 
+            
+Incremental Search / Find
+---
+    This is the window which is brought up when you hit Ctrl-F in a default Visual Studio 
+    installation.  It is implemented as an adornment on the IWpfTextView.  It can still
+    be visible even when the focus is in the ITextView  
+
+    Both ITextView::HasAggregateFocus and IWpfTextView::Visual::IsKeyboardFocusWithin are
+    true whether or not the caret is in the ITextView or the find ui
+
+    The FindUI adornment itself will only have IsKeyboardFocusWithin when the keyboard focus
+    is actually inside of the adornment 
+
+
+
+
+
